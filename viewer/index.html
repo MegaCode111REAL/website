@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>URL Loader</title>
+
+<style id="mainStyle">
+body {
+    margin: 0;
+    font-family: monospace;
+    background: #0a0a0a;
+    color: #00ff88;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+}
+
+#container {
+    text-align: center;
+    max-width: 700px;
+}
+
+h1 {
+    margin-bottom: 10px;
+}
+
+.box {
+    margin-top: 20px;
+    padding: 15px;
+    border: 1px solid #00ff88;
+    background: #000;
+}
+
+input {
+    margin-top: 10px;
+    padding: 6px;
+    background: black;
+    color: #00ff88;
+    border: 1px solid #00ff88;
+}
+</style>
+</head>
+
+<body>
+
+<div id="container"></div>
+
+<script>
+const params = new URLSearchParams(location.search);
+const htmlParam = params.get("html");
+const jsParam = params.get("js");
+
+const container = document.getElementById("container");
+
+// ===== LOADER MODE (NO CSS / NO UI) =====
+if (htmlParam || jsParam) {
+    // remove ALL styling + UI
+    document.getElementById("mainStyle")?.remove();
+    document.body.innerHTML = "";
+
+    // helper: detect URL
+    const isURL = (str) => str.startsWith("http://") || str.startsWith("https://");
+
+    // ===== HTML MODE =====
+    if (htmlParam) {
+        (async () => {
+            try {
+                let html;
+
+                if (isURL(htmlParam)) {
+                    const res = await fetch(htmlParam);
+                    html = await res.text();
+                } else {
+                    html = decodeURIComponent(htmlParam);
+                }
+
+                document.open();
+                document.write(html);
+                document.close();
+            } catch {
+                document.body.textContent = "Failed to load HTML";
+            }
+        })();
+    }
+
+    // ===== JS MODE =====
+    if (jsParam) {
+        (async () => {
+            try {
+                let code;
+
+                if (isURL(jsParam)) {
+                    const res = await fetch(jsParam);
+                    code = await res.text();
+                } else {
+                    code = decodeURIComponent(jsParam);
+                }
+
+                // capture console → plain text page
+                let output = "";
+
+                const capture = (type, args) => {
+                    output += args.map(a => {
+                        if (typeof a === "object") {
+                            try { return JSON.stringify(a); }
+                            catch { return "[object]"; }
+                        }
+                        return String(a);
+                    }).join(" ") + "\n";
+                };
+
+                console.log = (...a) => capture("log", a);
+                console.error = (...a) => capture("error", a);
+                console.warn = (...a) => capture("warn", a);
+
+                // run JS
+                new Function(code)();
+
+                // ONLY show output if no HTML param
+                if (!htmlParam) {
+                    document.body.textContent = output || "(no output)";
+                }
+
+            } catch (e) {
+                document.body.textContent = "JS Error: " + e;
+            }
+        })();
+    }
+
+    throw "Loader mode";
+}
+
+// ===== UI MODE =====
+container.innerHTML = `
+<h1>URL Loader</h1>
+<p>Load HTML or JavaScript using URL parameters.</p>
+
+<div class="box">
+<b>HTML:</b><br>
+?html=&lt;h1&gt;Hello&lt;/h1&gt;<br>
+or URL
+</div>
+
+<div class="box">
+<b>JavaScript:</b><br>
+?js=console.log("hello")<br>
+or URL
+</div>
+
+<div class="box">
+<b>Upload HTML file:</b><br>
+<input type="file" id="fileInput" accept=".html">
+</div>
+`;
+
+document.getElementById("fileInput").addEventListener("change", (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = function(event) {
+        document.getElementById("mainStyle").remove();
+        document.body.innerHTML = event.target.result;
+    };
+    reader.readAsText(file);
+});
+</script>
+
+</body>
+</html>
