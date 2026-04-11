@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MegaCode111</title>
+
+<style>
+    body {
+        margin: 0;
+        font-family: "Courier New", monospace;
+        background: black;
+        color: #00ff88;
+        overflow-x: hidden;
+    }
+
+    /* Animated gradient */
+    body::before {
+        content: "";
+        position: fixed;
+        width: 200%;
+        height: 200%;
+        background: radial-gradient(circle, #003322, black);
+        animation: moveBg 20s linear infinite;
+        z-index: -2;
+    }
+
+    @keyframes moveBg {
+        from { transform: translate(0,0); }
+        to { transform: translate(-25%, -25%); }
+    }
+
+    /* Particles */
+    canvas {
+        position: fixed;
+        top: 0;
+        left: 0;
+        z-index: -1;
+    }
+
+    header {
+        text-align: center;
+        padding: 60px 20px;
+    }
+
+    h1 {
+        font-size: 3em;
+        text-shadow: 0 0 10px #00ff88;
+    }
+
+    .typing {
+        border-right: 2px solid #00ff88;
+        display: inline-block;
+        padding-right: 5px;
+        animation: blink 1s infinite;
+    }
+
+    @keyframes blink {
+        50% { border-color: transparent; }
+    }
+
+    nav {
+        margin-top: 20px;
+    }
+
+    nav a {
+        color: #00ffaa;
+        margin: 0 15px;
+        text-decoration: none;
+    }
+
+    nav a:hover {
+        text-shadow: 0 0 10px #00ffaa;
+    }
+
+    section {
+        max-width: 900px;
+        margin: auto;
+        padding: 40px 20px;
+    }
+
+    .card {
+        background: rgba(0,0,0,0.7);
+        border: 1px solid #00ff88;
+        padding: 20px;
+        margin: 20px 0;
+        border-radius: 10px;
+        transition: 0.3s;
+    }
+
+    .card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 0 15px #00ff88;
+    }
+
+    .projects a {
+        display: block;
+        margin: 10px 0;
+        color: #00ffaa;
+        text-decoration: none;
+    }
+
+    .projects a:hover {
+        text-shadow: 0 0 10px #00ffaa;
+    }
+
+    footer {
+        text-align: center;
+        padding: 30px;
+        opacity: 0.5;
+    }
+</style>
+</head>
+
+<body>
+
+<canvas id="particles"></canvas>
+
+<header>
+    <h1>MegaCode111</h1>
+    <p class="typing" id="typing"></p>
+
+    <nav>
+        <a href="#about">About</a>
+        <a href="#projects">Projects</a>
+    </nav>
+</header>
+
+<section id="about">
+    <div class="card">
+        <h2>About Me</h2>
+        <p>
+            I build weird, experimental, and interactive web projects.
+            Mostly focused on creative coding, tools, and game-like systems.
+        </p>
+        <p>
+            I like:
+            <br>• JavaScript experiments  
+            <br>• Game mechanics & systems  
+            <br>• Web tools & hacks  
+            <br>• Making things that shouldn’t work… work  
+        </p>
+        <p>
+            Username: MegaCode111<br>
+            GitHub: MegaCode111REAL
+        </p>
+    </div>
+</section>
+
+<section id="projects">
+    <div class="card projects">
+        <h2>Projects</h2>
+
+        <!-- EDIT THESE LINKS -->
+        <a href="#">Project 1 - Your Project Here</a>
+        <a href="#">Project 2 - Another Thing</a>
+        <a href="#">Project 3 - Something Cool</a>
+
+    </div>
+</section>
+
+<footer>
+    <p>© MegaCode111</p>
+</footer>
+
+<script>
+/* Typing effect */
+const text = "coding • experiments • chaos";
+let i = 0;
+
+function type() {
+    if (i < text.length) {
+        document.getElementById("typing").innerHTML += text.charAt(i);
+        i++;
+        setTimeout(type, 60);
+    }
+}
+type();
+
+/* Particle background */
+const canvas = document.getElementById("particles");
+const ctx = canvas.getContext("2d");
+
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+
+let particles = [];
+
+for (let i = 0; i < 100; i++) {
+    particles.push({
+        x: Math.random() * canvas.width,
+        y: Math.random() * canvas.height,
+        vx: Math.random() - 0.5,
+        vy: Math.random() - 0.5
+    });
+}
+
+function draw() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    particles.forEach(p => {
+        p.x += p.vx;
+        p.y += p.vy;
+
+        if (p.x < 0 || p.x > canvas.width) p.vx *= -1;
+        if (p.y < 0 || p.y > canvas.height) p.vy *= -1;
+
+        ctx.fillStyle = "#00ff88";
+        ctx.fillRect(p.x, p.y, 2, 2);
+    });
+
+    requestAnimationFrame(draw);
+}
+
+draw();
+
+/* Resize fix */
+window.addEventListener("resize", () => {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+});
+</script>
+
+</body>
+</html>
