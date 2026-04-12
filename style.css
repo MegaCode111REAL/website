@@ -1,0 +1,103 @@
+body {
+    margin: 0;
+    font-family: "Courier New", monospace;
+    background: black;
+    color: #00ff88;
+    overflow-x: hidden;
+}
+
+/* Animated gradient */
+body::before {
+    content: "";
+    position: fixed;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, #003322, black);
+    animation: moveBg 20s linear infinite;
+    z-index: -2;
+}
+
+@keyframes moveBg {
+    from { transform: translate(0,0); }
+    to { transform: translate(-25%, -25%); }
+}
+
+/* Particles */
+canvas {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: -1;
+}
+
+header {
+    text-align: center;
+    padding: 60px 20px;
+}
+
+h1 {
+    font-size: 3em;
+    text-shadow: 0 0 10px #00ff88;
+}
+
+typing {
+    border-right: 2px solid #00ff88;
+    display: inline-block;
+    padding-right: 5px;
+    animation: blink 1s infinite;
+}
+
+@keyframes blink {
+    50% { border-color: transparent; }
+}
+
+nav {
+    margin-top: 20px;
+}
+
+nav a {
+    color: #00ffaa;
+    margin: 0 15px;
+    text-decoration: none;
+}
+
+nav a:hover {
+    text-shadow: 0 0 10px #00ffaa;
+}
+
+section {
+    max-width: 900px;
+    margin: auto;
+    padding: 40px 20px;
+}
+
+.card {
+    background: rgba(0,0,0,0.7);
+    border: 1px solid #00ff88;
+    padding: 20px;
+    margin: 20px 0;
+    border-radius: 10px;
+    transition: 0.3s;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 0 15px #00ff88;
+}
+
+.projects a {
+    display: block;
+    margin: 10px 0;
+    color: #00ffaa;
+    text-decoration: none;
+}
+
+.projects a:hover {
+    text-shadow: 0 0 10px #00ffaa;
+}
+
+footer {
+    text-align: center;
+    padding: 30px;
+    opacity: 0.5;
+}
