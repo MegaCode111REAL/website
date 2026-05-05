@@ -3,28 +3,145 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="style.css">
-    <title>Code Viewer</title>
+    <title>URL Loader</title>
+    <style id="mainStyle">
+        body {
+            margin: 0;
+            font-family: monospace;
+            background: #0a0a0a;
+            color: #00ff88;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+        }
+        #container {
+            text-align: center;
+            max-width: 700px;
+        }
+        h1 {
+            margin-bottom: 10px;
+        }
+        .box {
+            margin-top: 20px;
+            padding: 15px;
+            border: 1px solid #00ff88;
+            background: #000;
+        }
+        input {
+            margin-top: 10px;
+            padding: 6px;
+            background: black;
+            color: #00ff88;
+            border: 1px solid #00ff88;
+        }
+    </style>
 </head>
 <body>
-    <div id="loader" style="display:none;">Loading...</div>
-    <div class="container">
-        <div class="box" id="htmlBox">HTML</div>
-        <div class="box" id="jsBox">JavaScript</div>
-        <div class="box" id="uploadBox">Upload</div>
+    <div id="container">
+        <h1>URL Loader</h1>
+        <p>Load HTML or JavaScript using URL parameters.</p>
+        
+        <div class="box">
+            <b>HTML:</b><br>
+            ?html=&lt;h1&gt;Hello&lt;/h1&gt;<br>
+            or URL
+        </div>
+        
+        <div class="box">
+            <b>JavaScript:</b><br>
+            ?js=console.log("hello")<br>
+            or URL
+        </div>
+        
+        <div class="box">
+            <b>Upload HTML file:</b><br>
+            <input type="file" id="fileInput" accept=".html">
+        </div>
     </div>
-    <script>
-        // Loader functionality for ?html and ?js parameters
-        const params = new URLSearchParams(window.location.search);
-        const loader = document.getElementById('loader');
 
-        if (params.has('html') || params.has('js')) {
-            loader.style.display = 'block';
-            // Simulate loading
-            setTimeout(() => {
-                loader.style.display = 'none';
-            }, 2000);
+    <script>
+        const params = new URLSearchParams(location.search);
+        const htmlParam = params.get("html");
+        const jsParam = params.get("js");
+
+        // ===== LOADER MODE =====
+        if (htmlParam || jsParam) {
+            document.getElementById("mainStyle").remove();
+            document.body.innerHTML = "";
+
+            const isURL = (str) => str && (str.startsWith("http://") || str.startsWith("https://"));
+
+            // ===== HTML MODE =====
+            if (htmlParam) {
+                (async () => {
+                    try {
+                        let html;
+                        let baseURL = window.location.origin;
+
+                        if (isURL(htmlParam)) {
+                            const res = await fetch(htmlParam);
+                            html = await res.text();
+                            baseURL = new URL(htmlParam).origin;
+                        } else {
+                            html = decodeURIComponent(htmlParam);
+                        }
+
+                        const baseTag = `<base href="${baseURL}/">`;
+                        let finalHTML = html;
+
+                        if (html.includes("<head>")) {
+                            finalHTML = html.replace("<head>", `<head>${baseTag}`);
+                        } else if (html.includes("<html")) {
+                            finalHTML = html.replace(/<html[^>]*>/i, match => match + `<head>${baseTag}</head>`);
+                        } else {
+                            finalHTML = baseTag + html;
+                        }
+
+                        document.open();
+                        document.write(finalHTML);
+                        document.close();
+                    } catch (e) {
+                        document.body.textContent = "Failed to load HTML: " + e.message;
+                    }
+                })();
+            }
+
+            // ===== JS MODE (USERSCRIPT) =====
+            if (jsParam && !htmlParam) {
+                (async () => {
+                    try {
+                        let code;
+
+                        if (isURL(jsParam)) {
+                            const res = await fetch(jsParam);
+                            code = await res.text();
+                        } else {
+                            code = decodeURIComponent(jsParam);
+                        }
+
+                        const script = document.createElement("script");
+                        script.textContent = code;
+                        document.body.appendChild(script);
+                    } catch (e) {
+                        document.body.textContent = "JS Error: " + e.message;
+                    }
+                })();
+            }
         }
+
+        // File upload handler
+        document.getElementById("fileInput").addEventListener("change", (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                document.getElementById("mainStyle").remove();
+                document.body.innerHTML = event.target.result;
+            };
+            reader.readAsText(file);
+        });
     </script>
 </body>
 </html>
