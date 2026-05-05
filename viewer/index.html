@@ -3,42 +3,28 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Remote URL Injector</title>
+    <link rel="stylesheet" href="style.css">
+    <title>Code Viewer</title>
 </head>
 <body>
-    <div id="content"></div>
+    <div id="loader" style="display:none;">Loading...</div>
+    <div class="container">
+        <div class="box" id="htmlBox">HTML</div>
+        <div class="box" id="jsBox">JavaScript</div>
+        <div class="box" id="uploadBox">Upload</div>
+    </div>
     <script>
-        async function loadRemoteURL(url) {
-            try {
-                const response = await fetch(url);
-                if (!response.ok) throw new Error('Network response was not ok');
-                const html = await response.text();
+        // Loader functionality for ?html and ?js parameters
+        const params = new URLSearchParams(window.location.search);
+        const loader = document.getElementById('loader');
 
-                // Create a base URL for relative paths
-                const baseUrl = new URL(url).origin + '/';
-                const baseElement = document.createElement('base');
-                baseElement.href = baseUrl;
-                document.head.appendChild(baseElement);
-
-                // Inject the HTML
-                document.getElementById('content').innerHTML = html;
-
-                // Find and execute scripts
-                const scriptMatches = html.match(/<script[^>]*>([\s\S]*?)<\/script>/g) || [];
-                scriptMatches.forEach(scriptTag => {
-                    const blob = new Blob([scriptTag], { type: 'application/javascript' });
-                    const scriptElement = document.createElement('script');
-                    scriptElement.src = URL.createObjectURL(blob);
-                    scriptElement.onload = () => URL.revokeObjectURL(scriptElement.src);
-                    document.body.appendChild(scriptElement);
-                });
-            } catch (error) {
-                console.error('Error loading remote URL:', error);
-            }
+        if (params.has('html') || params.has('js')) {
+            loader.style.display = 'block';
+            // Simulate loading
+            setTimeout(() => {
+                loader.style.display = 'none';
+            }, 2000);
         }
-
-        // Example usage
-        loadRemoteURL('https://example.com'); // Replace with your desired remote URL
     </script>
 </body>
 </html>
